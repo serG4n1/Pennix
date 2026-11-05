@@ -1,6 +1,6 @@
 //! Фоновый поток Pennix: ловит горячую клавишу, прячет/показывает X11 окна и иконки трея.
 
-use crate::config::{save_hidden, save_hidden_tray, Hotkey};
+use crate::config::{save_hidden, save_hidden_tray, Hotkey, SelectionMode, WindowTarget};
 use crate::x11::{HiddenWin, X};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::sync::{Arc, Mutex};
@@ -11,7 +11,9 @@ use x11rb::protocol::Event;
 
 #[derive(Clone, Default)]
 pub struct Selection {
+    pub mode: SelectionMode,
     pub classes: Vec<String>,
+    pub windows: Vec<WindowTarget>,
     pub hide_self: bool,
     pub hide_tray: bool,
 }
@@ -64,8 +66,13 @@ impl Engine {
                 let sel = selection.lock().unwrap().clone();
                 let self_pid = sel.hide_self.then_some(own_pid);
 
-                // 1. Скрываем X11 окна
-                for w in x.windows_matching(&sel.classes, self_pid, own_pid) {
+                // 1. Скрываем X11 окна в зависимости от выбранного режима
+                let matching = match sel.mode {
+                    SelectionMode::Apps => x.windows_matching(&sel.classes, self_pid, own_pid),
+                    SelectionMode::Windows => x.windows_matching_targets(&sel.windows, self_pid, own_pid),
+                };
+
+                for w in matching {
                     if !hidden_w.iter().any(|h| h.id == w) {
                         if let Some(h) = x.hide_window(w) {
                             hidden_w.push(h);
@@ -77,13 +84,24 @@ impl Engine {
 
                 // 2. Скрываем иконки трея (StatusNotifierItem / XApp)
                 if sel.hide_tray {
-                    let new_tray = crate::tray::hide_tray_items(&sel.classes);
-                    for k in new_tray {
-                        if !hidden_t.contains(&k) {
-                            hidden_t.push(k);
+                    let tray_classes = match sel.mode {
+                        SelectionMode::Apps => sel.classes.clone(),
+                        SelectionMode::Windows => {
+                            let mut list: Vec<String> = sel.windows.iter().map(|w| w.class.clone()).collect();
+                            list.sort();
+                            list.dedup();
+                            list
                         }
+                    };
+                    if !tray_classes.is_empty() {
+                        let new_tray = crate::tray::hide_tray_items(&tray_classes);
+                        for k in new_tray {
+                            if !hidden_t.contains(&k) {
+                                hidden_t.push(k);
+                            }
+                        }
+                        save_hidden_tray(hidden_t);
                     }
-                    save_hidden_tray(hidden_t);
                 }
             };
 

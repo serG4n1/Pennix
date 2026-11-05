@@ -1,4 +1,5 @@
 use super::PennixApp;
+use crate::config::{SelectionMode, WindowTarget};
 use crate::engine::Status;
 use crate::theme::*;
 use eframe::egui::{self, pos2, vec2, Align2, Color32, FontId, Rect, RichText, Sense, Stroke};
@@ -67,8 +68,24 @@ impl PennixApp {
     }
 
     pub(super) fn apps_panel(&mut self, ui: &mut egui::Ui) {
-        step_title(ui, 1, "Приложения для скрытия", "Окна и иконки системного трея");
-        ui.add_space(6.0);
+        step_title(ui, 1, "Что скрывать", "Приложения целиком или конкретные окна");
+        ui.add_space(8.0);
+
+        // Переключатель режимов: Приложения / Окна
+        ui.horizontal(|ui| {
+            let total_w = ui.available_width();
+            let half = ((total_w - 6.0) / 2.0).max(60.0);
+            if mode_pill(ui, "📱  По приложениям", self.cfg.mode == SelectionMode::Apps, half).clicked() {
+                self.cfg.mode = SelectionMode::Apps;
+                self.sync_selection();
+            }
+            if mode_pill(ui, "🪟  По окнам / процессам", self.cfg.mode == SelectionMode::Windows, half).clicked() {
+                self.cfg.mode = SelectionMode::Windows;
+                self.sync_selection();
+            }
+        });
+        ui.add_space(8.0);
+
         ui.horizontal(|ui| {
             let w = ui.available_width() - 110.0;
             ui.add(
@@ -84,6 +101,13 @@ impl PennixApp {
         });
         ui.add_space(4.0);
 
+        match self.cfg.mode {
+            SelectionMode::Apps => self.render_apps_mode(ui),
+            SelectionMode::Windows => self.render_windows_mode(ui),
+        }
+    }
+
+    fn render_apps_mode(&mut self, ui: &mut egui::Ui) {
         let q = self.search.to_lowercase();
         let mut toggled: Option<String> = None;
         egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
@@ -201,6 +225,136 @@ impl PennixApp {
         }
     }
 
+    fn render_windows_mode(&mut self, ui: &mut egui::Ui) {
+        let q = self.search.to_lowercase();
+        let mut toggle_target: Option<WindowTarget> = None;
+
+        egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+            let visible: Vec<_> = self
+                .windows
+                .iter()
+                .filter(|w| {
+                    q.is_empty()
+                        || w.title.to_lowercase().contains(&q)
+                        || w.class.to_lowercase().contains(&q)
+                        || w.pid.map_or(false, |p| p.to_string().contains(&q))
+                })
+                .collect();
+
+            if visible.is_empty() {
+                ui.add_space(30.0);
+                ui.vertical_centered(|ui| {
+                    ui.label(RichText::new("Нет подходящих открытых окон").color(MUTED))
+                });
+            }
+
+            for win in visible {
+                let selected = self.cfg.windows.iter().any(|t| {
+                    (t.id != 0 && t.id == win.id)
+                        || (t.class == win.class && t.title == win.title)
+                });
+
+                let (rect, resp) =
+                    ui.allocate_exact_size(vec2(ui.available_width(), 62.0), Sense::click());
+                let hover = ui.ctx().animate_bool(resp.id.with("win_h"), resp.hovered());
+                let base = if selected { lerp(ROW, ACCENT, 0.18) } else { ROW };
+                let p = ui.painter();
+                p.rect_filled(rect, 12, lerp(base, ROW_HOVER, hover * 0.7));
+                if selected {
+                    p.rect_stroke(
+                        rect,
+                        12,
+                        Stroke::new(1.0, ACCENT.gamma_multiply(0.8)),
+                        egui::StrokeKind::Inside,
+                    );
+                }
+
+                // Иконка
+                let icon_r =
+                    Rect::from_center_size(pos2(rect.left() + 30.0, rect.center().y), vec2(32.0, 32.0));
+                match self.icons.get(&win.class).and_then(|t| t.as_ref()) {
+                    Some(tex) => {
+                        let _ = p.image(
+                            tex.id(),
+                            icon_r,
+                            Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)),
+                            Color32::WHITE,
+                        );
+                    }
+                    None => {
+                        p.rect_filled(icon_r, 8, lerp(ACCENT, ACCENT2, 0.5));
+                        let letter =
+                            win.class.chars().next().unwrap_or('?').to_uppercase().to_string();
+                        p.text(
+                            icon_r.center(),
+                            Align2::CENTER_CENTER,
+                            letter,
+                            FontId::proportional(16.0),
+                            Color32::WHITE,
+                        );
+                    }
+                }
+
+                let tx = rect.left() + 56.0;
+                let max_chars = ((rect.width() - 130.0) / 7.5).max(10.0) as usize;
+
+                // Заголовок окна
+                p.text(
+                    pos2(tx, rect.center().y - 9.0),
+                    Align2::LEFT_CENTER,
+                    short(&win.title, max_chars),
+                    FontId::proportional(14.5),
+                    TEXT,
+                );
+
+                // Инфо: Класс + PID + Живо ли
+                let pid_str = win.pid.map_or("".to_string(), |pid| format!(" · PID: {pid}"));
+                let status_str = if !win.is_alive {
+                    " · (скрыто / неактивно)".to_string()
+                } else {
+                    "".to_string()
+                };
+                let sub = format!("{}{}{}", win.class, pid_str, status_str);
+
+                p.text(
+                    pos2(tx, rect.center().y + 11.0),
+                    Align2::LEFT_CENTER,
+                    short(&sub, max_chars),
+                    FontId::proportional(12.0),
+                    MUTED,
+                );
+
+                // Переключатель
+                let sw = Rect::from_center_size(
+                    pos2(rect.right() - 34.0, rect.center().y),
+                    vec2(40.0, 22.0),
+                );
+                switch(ui, sw, selected, resp.id.with("win_sw"));
+                if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+                    toggle_target = Some(WindowTarget {
+                        id: win.id,
+                        title: win.title.clone(),
+                        class: win.class.clone(),
+                        pid: win.pid,
+                    });
+                }
+                ui.add_space(2.0);
+            }
+        });
+
+        if let Some(target) = toggle_target {
+            if let Some(i) = self.cfg.windows.iter().position(|t| {
+                (t.id != 0 && t.id == target.id)
+                    || (t.class == target.class && t.title == target.title)
+            }) {
+                self.cfg.windows.remove(i);
+            } else {
+                self.cfg.windows.push(target);
+            }
+            self.sync_selection();
+        }
+    }
+
     pub(super) fn hotkey_panel(&mut self, ui: &mut egui::Ui, st: &Status) {
         step_title(ui, 2, "Горячая клавиша", "Сочетание для скрытия и возврата");
         ui.add_space(10.0);
@@ -281,21 +435,30 @@ impl PennixApp {
             };
             ui.label(RichText::new(hint).color(MUTED));
         } else {
-            let can = !self.cfg.classes.is_empty() || self.cfg.hide_self;
+            let (can, count_str) = match self.cfg.mode {
+                SelectionMode::Apps => (
+                    !self.cfg.classes.is_empty() || self.cfg.hide_self,
+                    format!("Выбрано приложений: {}", self.cfg.classes.len()),
+                ),
+                SelectionMode::Windows => (
+                    !self.cfg.windows.is_empty() || self.cfg.hide_self,
+                    format!("Выбрано окон: {}", self.cfg.windows.len()),
+                ),
+            };
+
             if big_button(ui, "▶  Запустить", ACCENT, ACCENT2, w).clicked() && self.x.is_some() {
                 if can {
                     self.recording = false;
                     self.start(ctx);
                 } else {
-                    self.start_error =
-                        Some("Сначала выберите хотя бы одно приложение слева.".into());
+                    self.start_error = match self.cfg.mode {
+                        SelectionMode::Apps => Some("Сначала выберите хотя бы одно приложение слева.".into()),
+                        SelectionMode::Windows => Some("Сначала выберите хотя бы одно окно слева.".into()),
+                    };
                 }
             }
             ui.add_space(8.0);
-            ui.label(
-                RichText::new(format!("Выбрано приложений: {}", self.cfg.classes.len()))
-                    .color(MUTED),
-            );
+            ui.label(RichText::new(count_str).color(MUTED));
         }
         if let Some(e) = &self.start_error {
             ui.add_space(8.0);

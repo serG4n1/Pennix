@@ -78,12 +78,33 @@ fn default_true() -> bool {
     true
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub enum SelectionMode {
+    #[default]
+    Apps,
+    Windows,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct WindowTarget {
+    #[serde(default)]
+    pub id: u32,
+    pub title: String,
+    pub class: String,
+    #[serde(default)]
+    pub pid: Option<u32>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default)]
     pub hotkey: Hotkey,
     #[serde(default)]
+    pub mode: SelectionMode,
+    #[serde(default)]
     pub classes: Vec<String>,
+    #[serde(default)]
+    pub windows: Vec<WindowTarget>,
     #[serde(default = "default_true")]
     pub hide_self: bool,
     #[serde(default = "default_true")]
@@ -94,7 +115,9 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             hotkey: Hotkey::default(),
+            mode: SelectionMode::Apps,
             classes: Vec::new(),
+            windows: Vec::new(),
             hide_self: true,
             hide_tray: true,
         }

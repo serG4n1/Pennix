@@ -156,3 +156,33 @@ pub fn big_button(ui: &mut Ui, text: &str, c1: Color32, c2: Color32, width: f32)
     p.text(rect.center(), egui::Align2::CENTER_CENTER, text, FontId::proportional(18.0), Color32::WHITE);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
+
+/// Кнопка-переключатель режима (таблетка).
+pub fn mode_pill(ui: &mut Ui, text: &str, active: bool, width: f32) -> Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(width, 36.0), Sense::click());
+    let hover = ui.ctx().animate_bool(resp.id.with("pill_h"), resp.hovered());
+    let t = ui.ctx().animate_bool(resp.id.with("pill_act"), active);
+    let p = ui.painter();
+
+    let bg = lerp(ROW, ACCENT, t * 0.85);
+    let bg = lerp(bg, ROW_HOVER, hover * (1.0 - t) * 0.7);
+    p.rect_filled(rect, CornerRadius::same(10), bg);
+
+    let stroke_color = if active {
+        ACCENT2
+    } else {
+        lerp(BORDER, ACCENT, hover * 0.5)
+    };
+    p.rect_stroke(rect, CornerRadius::same(10), Stroke::new(1.0, stroke_color), egui::StrokeKind::Inside);
+
+    let text_color = lerp(MUTED, Color32::WHITE, t * 0.85 + hover * 0.15);
+    p.text(
+        rect.center(),
+        egui::Align2::CENTER_CENTER,
+        text,
+        FontId::proportional(13.5),
+        text_color,
+    );
+
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}

@@ -17,21 +17,31 @@ pub struct AppEntry {
     pub in_tray: bool,
 }
 
+#[derive(Clone, Debug)]
+pub struct WindowEntry {
+    pub id: u32,
+    pub title: String,
+    pub class: String,
+    pub pid: Option<u32>,
+    pub is_alive: bool,
+}
+
 pub struct PennixApp {
-    cfg: Config,
-    x: Option<X>,
-    x_error: Option<String>,
-    apps: Vec<AppEntry>,
-    icons: HashMap<String, Option<TextureHandle>>,
-    logo: Option<TextureHandle>,
-    last_refresh: Instant,
-    search: String,
-    recording: bool,
-    engine: Option<Engine>,
-    selection: Arc<Mutex<Selection>>,
-    status: Arc<Mutex<Status>>,
-    start_error: Option<String>,
-    wayland: bool,
+    pub cfg: Config,
+    pub x: Option<X>,
+    pub x_error: Option<String>,
+    pub apps: Vec<AppEntry>,
+    pub windows: Vec<WindowEntry>,
+    pub icons: HashMap<String, Option<TextureHandle>>,
+    pub logo: Option<TextureHandle>,
+    pub last_refresh: Instant,
+    pub search: String,
+    pub recording: bool,
+    pub engine: Option<Engine>,
+    pub selection: Arc<Mutex<Selection>>,
+    pub status: Arc<Mutex<Status>>,
+    pub start_error: Option<String>,
+    pub wayland: bool,
 }
 
 impl PennixApp {
@@ -68,7 +78,9 @@ impl PennixApp {
         });
 
         let selection = Arc::new(Mutex::new(Selection {
+            mode: cfg.mode,
             classes: cfg.classes.clone(),
+            windows: cfg.windows.clone(),
             hide_self: cfg.hide_self,
             hide_tray: cfg.hide_tray,
         }));
@@ -80,6 +92,7 @@ impl PennixApp {
             x,
             x_error,
             apps: vec![],
+            windows: vec![],
             icons: HashMap::new(),
             logo,
             last_refresh: Instant::now(),
@@ -101,11 +114,40 @@ impl PennixApp {
 
         // 1. Опрашиваем окна X11
         let mut map: Vec<(String, Vec<String>, u32)> = Vec::new();
+        let mut win_entries: Vec<WindowEntry> = Vec::new();
+
         if let Some(x) = &self.x {
-            for w in x.list_windows().into_iter().filter(|w| w.pid != Some(own) && w.class != "pennix") {
+            for w in x
+                .list_windows()
+                .into_iter()
+                .filter(|w| w.pid != Some(own) && w.class != "pennix" && w.class != "pennix-linux")
+            {
+                let display_title = if w.title.trim().is_empty() {
+                    format!("<Без названия: {}>", w.class)
+                } else {
+                    w.title.clone()
+                };
+
+                // Для группировки по приложениям
                 match map.iter_mut().find(|e| e.0 == w.class) {
-                    Some(e) => e.1.push(w.title),
-                    None => map.push((w.class.clone(), vec![w.title], w.id)),
+                    Some(e) => e.1.push(display_title.clone()),
+                    None => map.push((w.class.clone(), vec![display_title.clone()], w.id)),
+                }
+
+                // Для списка отдельных окон / процессов
+                win_entries.push(WindowEntry {
+                    id: w.id,
+                    title: display_title.clone(),
+                    class: w.class.clone(),
+                    pid: w.pid,
+                    is_alive: true,
+                });
+
+                // Если заголовок окна изменился (например, переключили вкладку), обновим в сохранённых
+                for saved in &mut self.cfg.windows {
+                    if saved.id != 0 && saved.id == w.id && saved.title != display_title {
+                        saved.title = display_title.clone();
+                    }
                 }
             }
 
@@ -120,6 +162,31 @@ impl PennixApp {
                 }
             }
         }
+
+        // Сохраняем ранее выбранные окна, если они сейчас скрыты или закрыты
+        for saved in &self.cfg.windows {
+            let already = win_entries.iter().any(|w| {
+                (saved.id != 0 && w.id == saved.id)
+                    || (w.class == saved.class && w.title == saved.title)
+            });
+            if !already {
+                win_entries.push(WindowEntry {
+                    id: saved.id,
+                    title: saved.title.clone(),
+                    class: saved.class.clone(),
+                    pid: saved.pid,
+                    is_alive: false,
+                });
+            }
+        }
+
+        win_entries.sort_by(|a, b| {
+            a.class
+                .to_lowercase()
+                .cmp(&b.class.to_lowercase())
+                .then_with(|| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
+        });
+        self.windows = win_entries;
 
         // 2. Опрашиваем системный трей (StatusNotifierItem / XApp)
         let tray_items = crate::tray::list_tray_items();
@@ -206,9 +273,11 @@ impl PennixApp {
         self.apps = app_entries;
     }
 
-    fn sync_selection(&mut self) {
+    pub fn sync_selection(&mut self) {
         *self.selection.lock().unwrap() = Selection {
+            mode: self.cfg.mode,
             classes: self.cfg.classes.clone(),
+            windows: self.cfg.windows.clone(),
             hide_self: self.cfg.hide_self,
             hide_tray: self.cfg.hide_tray,
         };

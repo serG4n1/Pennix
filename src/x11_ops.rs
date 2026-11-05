@@ -1,5 +1,6 @@
 //! Скрытие/восстановление окон и глобальные горячие клавиши.
 
+use crate::config::WindowTarget;
 use crate::x11::{HiddenWin, X};
 use x11rb::connection::Connection;
 use x11rb::protocol::xproto::*;
@@ -44,11 +45,45 @@ impl X {
         self.list_windows()
             .into_iter()
             .filter(|w| {
-                let mine = w.pid == Some(own_pid) || w.class == "pennix";
+                let mine = w.pid == Some(own_pid) || w.class == "pennix" || w.class == "pennix-linux";
                 if mine {
                     self_pid.is_some()
                 } else {
                     classes.iter().any(|c| c == &w.class)
+                }
+            })
+            .map(|w| w.id)
+            .collect()
+    }
+
+    /// Окна конкретных выбранных окон/вкладок (+ окна `self_pid`, если задан).
+    pub fn windows_matching_targets(
+        &self,
+        targets: &[WindowTarget],
+        self_pid: Option<u32>,
+        own_pid: u32,
+    ) -> Vec<Window> {
+        self.list_windows()
+            .into_iter()
+            .filter(|w| {
+                let mine = w.pid == Some(own_pid) || w.class == "pennix" || w.class == "pennix-linux";
+                if mine {
+                    self_pid.is_some()
+                } else {
+                    targets.iter().any(|t| {
+                        if t.id != 0 && w.id == t.id {
+                            return true;
+                        }
+                        if !t.title.is_empty() && t.class == w.class && t.title == w.title {
+                            return true;
+                        }
+                        if let (Some(t_pid), Some(w_pid)) = (t.pid, w.pid) {
+                            if t_pid != 0 && t_pid == w_pid && t.class == w.class && (w.title.contains(&t.title) || t.title.contains(&w.title)) {
+                                return true;
+                            }
+                        }
+                        false
+                    })
                 }
             })
             .map(|w| w.id)
