@@ -1,0 +1,11 @@
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/arrayvec-a4d2cd7de5193db9.d: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec_impl.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/array_string.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/char.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/errors.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/utils.rs
+
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/libarrayvec-a4d2cd7de5193db9.rmeta: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec_impl.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/array_string.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/char.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/errors.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/utils.rs
+
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/lib.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec_impl.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/arrayvec.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/array_string.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/char.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/errors.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/utils.rs:

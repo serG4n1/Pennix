@@ -1,7 +1,6 @@
-//! Фоновый поток: ловит горячую клавишу и прячет/показывает окна и иконки в трее.
+//! Фоновый поток Pennix: ловит горячую клавишу, прячет/показывает X11 окна и иконки трея.
 
-use crate::config::{save_hidden, Hotkey};
-use crate::tray::{hide_tray_for_classes, restore_tray_icons};
+use crate::config::{save_hidden, save_hidden_tray, Hotkey};
 use crate::x11::{HiddenWin, X};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::sync::{Arc, Mutex};
@@ -20,9 +19,7 @@ pub struct Selection {
 #[derive(Clone, Default)]
 pub struct Status {
     pub running: bool,
-    pub is_hidden: bool,
     pub hidden_count: usize,
-    pub hidden_tray_count: usize,
     pub error: Option<String>,
 }
 
@@ -53,68 +50,63 @@ impl Engine {
         x.detectable_autorepeat();
         let _ = x.conn.flush();
 
-        *status.lock().unwrap() = Status {
-            running: true,
-            is_hidden: false,
-            hidden_count: 0,
-            hidden_tray_count: 0,
-            error: None,
-        };
+        *status.lock().unwrap() = Status { running: true, hidden_count: 0, error: None };
         let (tx, rx) = channel();
         let handle = std::thread::spawn(move || {
             let own_pid = std::process::id();
-            let mut hidden: Vec<HiddenWin> = Vec::new();
+            let mut hidden_windows: Vec<HiddenWin> = Vec::new();
             let mut hidden_tray: Vec<String> = Vec::new();
-            let mut is_hidden = false;
             let mut focus = None;
             let mut key_down = false;
             let mut last_scan = Instant::now();
 
-            let hide_new = |x: &X, hidden: &mut Vec<HiddenWin>, hidden_tray: &mut Vec<String>| {
+            let hide_new = |x: &X, hidden_w: &mut Vec<HiddenWin>, hidden_t: &mut Vec<String>| {
                 let sel = selection.lock().unwrap().clone();
                 let self_pid = sel.hide_self.then_some(own_pid);
+
+                // 1. Скрываем X11 окна
                 for w in x.windows_matching(&sel.classes, self_pid, own_pid) {
-                    if !hidden.iter().any(|h| h.id == w) {
+                    if !hidden_w.iter().any(|h| h.id == w) {
                         if let Some(h) = x.hide_window(w) {
-                            hidden.push(h);
+                            hidden_w.push(h);
                         }
                     }
                 }
                 let _ = x.conn.flush();
-                save_hidden(hidden);
+                save_hidden(hidden_w);
 
+                // 2. Скрываем иконки трея (StatusNotifierItem / XApp)
                 if sel.hide_tray {
-                    let newly_hidden = hide_tray_for_classes(&sel.classes);
-                    for r in newly_hidden {
-                        if !hidden_tray.iter().any(|existing| existing.eq_ignore_ascii_case(&r)) {
-                            hidden_tray.push(r);
+                    let new_tray = crate::tray::hide_tray_items(&sel.classes);
+                    for k in new_tray {
+                        if !hidden_t.contains(&k) {
+                            hidden_t.push(k);
                         }
                     }
+                    save_hidden_tray(hidden_t);
                 }
             };
 
             let toggle = |x: &X,
-                          hidden: &mut Vec<HiddenWin>,
-                          hidden_tray: &mut Vec<String>,
-                          is_hidden: &mut bool,
+                          hidden_w: &mut Vec<HiddenWin>,
+                          hidden_t: &mut Vec<String>,
                           focus: &mut Option<u32>| {
-                if !*is_hidden {
+                let is_hidden = !hidden_w.is_empty() || !hidden_t.is_empty();
+                if !is_hidden {
                     *focus = x.active_window();
-                    hide_new(x, hidden, hidden_tray);
-                    *is_hidden = !hidden.is_empty() || !hidden_tray.is_empty();
+                    hide_new(x, hidden_w, hidden_t);
                 } else {
-                    x.show_windows(hidden, *focus);
-                    hidden.clear();
-                    save_hidden(hidden);
-                    restore_tray_icons();
-                    hidden_tray.clear();
-                    *is_hidden = false;
+                    x.show_windows(hidden_w, *focus);
+                    hidden_w.clear();
+                    save_hidden(hidden_w);
+
+                    if !hidden_t.is_empty() {
+                        crate::tray::show_tray_items(hidden_t);
+                        hidden_t.clear();
+                        save_hidden_tray(hidden_t);
+                    }
                 }
-                let mut st = status.lock().unwrap();
-                st.is_hidden = *is_hidden;
-                st.hidden_count = hidden.len();
-                st.hidden_tray_count = hidden_tray.len();
-                drop(st);
+                status.lock().unwrap().hidden_count = hidden_w.len() + hidden_t.len();
                 repaint();
             };
 
@@ -124,21 +116,22 @@ impl Engine {
                         Ok(Some(Event::KeyPress(_))) => {
                             if !key_down {
                                 key_down = true;
-                                toggle(&x, &mut hidden, &mut hidden_tray, &mut is_hidden, &mut focus);
+                                toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut focus);
                             }
                         }
                         Ok(Some(Event::KeyRelease(_))) => key_down = false,
                         Ok(Some(_)) => {}
                         Ok(None) => break,
                         Err(e) => {
-                            x.show_windows(&hidden, focus);
+                            x.show_windows(&hidden_windows, focus);
                             save_hidden(&[]);
-                            restore_tray_icons();
+                            if !hidden_tray.is_empty() {
+                                crate::tray::show_tray_items(&hidden_tray);
+                                save_hidden_tray(&[]);
+                            }
                             *status.lock().unwrap() = Status {
                                 running: false,
-                                is_hidden: false,
                                 hidden_count: 0,
-                                hidden_tray_count: 0,
                                 error: Some(format!("Связь с X-сервером потеряна: {e}")),
                             };
                             repaint();
@@ -147,39 +140,26 @@ impl Engine {
                     }
                 }
                 match rx.try_recv() {
-                    Ok(Cmd::Toggle) => toggle(&x, &mut hidden, &mut hidden_tray, &mut is_hidden, &mut focus),
+                    Ok(Cmd::Toggle) => toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut focus),
                     Ok(Cmd::Stop) | Err(TryRecvError::Disconnected) => break,
                     Err(TryRecvError::Empty) => {}
                 }
-                // Пока режим скрытия активен — прячем и вновь открывшиеся окна выбранных приложений.
+                // Пока окна или трей спрятаны — подхватываем вновь открывающиеся окна
+                let is_hidden = !hidden_windows.is_empty() || !hidden_tray.is_empty();
                 if is_hidden && last_scan.elapsed() > Duration::from_millis(500) {
                     last_scan = Instant::now();
-                    let sel = selection.lock().unwrap().clone();
-                    let self_pid = sel.hide_self.then_some(own_pid);
-                    let mut changed = false;
-                    for w in x.windows_matching(&sel.classes, self_pid, own_pid) {
-                        if !hidden.iter().any(|h| h.id == w) {
-                            if let Some(h) = x.hide_window(w) {
-                                hidden.push(h);
-                                changed = true;
-                            }
-                        }
-                    }
-                    if changed {
-                        let _ = x.conn.flush();
-                        save_hidden(&hidden);
-                        let mut st = status.lock().unwrap();
-                        st.hidden_count = hidden.len();
-                        drop(st);
-                        repaint();
-                    }
+                    hide_new(&x, &mut hidden_windows, &mut hidden_tray);
+                    status.lock().unwrap().hidden_count = hidden_windows.len() + hidden_tray.len();
                 }
                 std::thread::sleep(Duration::from_millis(15));
             }
 
-            x.show_windows(&hidden, focus);
+            x.show_windows(&hidden_windows, focus);
             save_hidden(&[]);
-            restore_tray_icons();
+            if !hidden_tray.is_empty() {
+                crate::tray::show_tray_items(&hidden_tray);
+                save_hidden_tray(&[]);
+            }
             x.ungrab(&codes, mods);
             *status.lock().unwrap() = Status::default();
             repaint();

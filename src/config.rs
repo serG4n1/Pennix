@@ -1,4 +1,4 @@
-//! Настройки, горячая клавиша и файл «аварийного восстановления».
+//! Настройки, горячая клавиша и файл «аварийного восстановления» для Pennix.
 
 use crate::x11::HiddenWin;
 use eframe::egui::{Key, Modifiers};
@@ -105,7 +105,7 @@ pub fn config_dir() -> PathBuf {
     let base = std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config"));
-    base.join("pennix-linux")
+    base.join("pennix")
 }
 
 impl Config {
@@ -125,8 +125,7 @@ impl Config {
     }
 }
 
-/// Список спрятанных окон на диске: если программа упадёт или будет убита,
-/// при следующем запуске окна вернутся.
+/// Список спрятанных окон на диске.
 pub fn save_hidden(list: &[HiddenWin]) {
     let path = config_dir().join("hidden.json");
     if list.is_empty() {
@@ -141,6 +140,26 @@ pub fn save_hidden(list: &[HiddenWin]) {
 
 pub fn load_hidden() -> Vec<HiddenWin> {
     std::fs::read_to_string(config_dir().join("hidden.json"))
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default()
+}
+
+/// Список спрятанных элементов трея на диске.
+pub fn save_hidden_tray(keys: &[String]) {
+    let path = config_dir().join("hidden_tray.json");
+    if keys.is_empty() {
+        let _ = std::fs::remove_file(path);
+    } else {
+        let _ = std::fs::create_dir_all(config_dir());
+        if let Ok(s) = serde_json::to_string(keys) {
+            let _ = std::fs::write(path, s);
+        }
+    }
+}
+
+pub fn load_hidden_tray() -> Vec<String> {
+    std::fs::read_to_string(config_dir().join("hidden_tray.json"))
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok())
         .unwrap_or_default()

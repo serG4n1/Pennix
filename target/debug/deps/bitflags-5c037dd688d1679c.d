@@ -1,0 +1,11 @@
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/bitflags-5c037dd688d1679c.d: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/iter.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/parser.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/traits.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/public.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/internal.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/external.rs
+
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/libbitflags-5c037dd688d1679c.rmeta: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/iter.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/parser.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/traits.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/public.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/internal.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/external.rs
+
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/lib.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/iter.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/parser.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/traits.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/public.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/internal.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/external.rs:

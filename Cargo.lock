@@ -816,17 +816,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e17592d60ebacc7d5e169f4663c5f84f9161cc90328abcfe8456f41e4dfcb284"
 
 [[package]]
-name = "hiddex-linux"
-version = "1.0.0"
-dependencies = [
- "eframe",
- "image",
- "serde",
- "serde_json",
- "x11rb 0.14.0",
-]
-
-[[package]]
 name = "image"
 version = "0.25.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1485,6 +1474,17 @@ dependencies = [
  "kurbo",
  "linebender_resource_handle",
  "smallvec",
+]
+
+[[package]]
+name = "pennix-linux"
+version = "1.0.0"
+dependencies = [
+ "eframe",
+ "image",
+ "serde",
+ "serde_json",
+ "x11rb 0.14.0",
 ]
 
 [[package]]

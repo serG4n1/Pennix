@@ -44,11 +44,11 @@ impl X {
         self.list_windows()
             .into_iter()
             .filter(|w| {
-                let mine = w.pid == Some(own_pid) || w.class == "pennix-linux";
+                let mine = w.pid == Some(own_pid) || w.class == "pennix";
                 if mine {
                     self_pid.is_some()
                 } else {
-                    classes.iter().any(|c| c.eq_ignore_ascii_case(&w.class))
+                    classes.iter().any(|c| c == &w.class)
                 }
             })
             .map(|w| w.id)

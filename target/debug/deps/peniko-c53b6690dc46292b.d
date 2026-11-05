@@ -1,0 +1,11 @@
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/peniko-c53b6690dc46292b.d: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/blend.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/brush.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/gradient.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/image.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/style.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/impl_bytemuck.rs
+
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/libpeniko-c53b6690dc46292b.rmeta: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/blend.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/brush.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/gradient.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/image.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/style.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/impl_bytemuck.rs
+
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/lib.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/blend.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/brush.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/gradient.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/image.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/style.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/peniko-0.6.1/src/impl_bytemuck.rs:

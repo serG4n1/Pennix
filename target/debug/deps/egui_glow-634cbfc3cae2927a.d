@@ -1,0 +1,11 @@
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/egui_glow-634cbfc3cae2927a.d: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/painter.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/misc_util.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader_version.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/vao.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/vertex.glsl /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/fragment.glsl
+
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/libegui_glow-634cbfc3cae2927a.rmeta: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/painter.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/misc_util.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader_version.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/vao.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/vertex.glsl /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/fragment.glsl
+
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/lib.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/painter.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/misc_util.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader_version.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/vao.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/vertex.glsl:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui_glow-0.37.0/src/shader/fragment.glsl:

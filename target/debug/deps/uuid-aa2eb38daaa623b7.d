@@ -1,0 +1,13 @@
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/uuid-aa2eb38daaa623b7.d: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/macros.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/builder.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/error.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/non_nil.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/parser.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/fmt.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/timestamp.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/external.rs
+
+/home/levchik/.gemini/antigravity-ide/scratch/pennix-linux/target/debug/deps/libuuid-aa2eb38daaa623b7.rmeta: /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/lib.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/macros.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/builder.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/error.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/non_nil.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/parser.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/fmt.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/timestamp.rs /home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/external.rs
+
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/lib.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/macros.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/builder.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/error.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/non_nil.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/parser.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/fmt.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/timestamp.rs:
+/home/levchik/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.29.0/src/external.rs:
