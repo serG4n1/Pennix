@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Pennix
+Comment=Скрытие окон и иконок трея приложений по горячей клавише
+Exec=pennix-linux
+Icon=pennix
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=pennix;hide;window;tray;boss-key;
+StartupWMClass=pennix-linux
