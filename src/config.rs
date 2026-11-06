@@ -109,6 +109,8 @@ pub struct Config {
     pub hide_self: bool,
     #[serde(default = "default_true")]
     pub hide_tray: bool,
+    #[serde(default = "default_true")]
+    pub mute_audio: bool,
 }
 
 impl Default for Config {
@@ -120,6 +122,7 @@ impl Default for Config {
             windows: Vec::new(),
             hide_self: true,
             hide_tray: true,
+            mute_audio: true,
         }
     }
 }

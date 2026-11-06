@@ -400,6 +400,13 @@ impl PennixApp {
             self.cfg.hide_tray = ht;
             self.sync_selection();
         }
+
+        // Опция заглушения звука
+        let mut ma = self.cfg.mute_audio;
+        if ui.checkbox(&mut ma, "🔇 Глушить звук скрываемых программ").changed() {
+            self.cfg.mute_audio = ma;
+            self.sync_selection();
+        }
     }
 
     pub(super) fn run_panel(&mut self, ui: &mut egui::Ui, st: &Status, ctx: &egui::Context) {

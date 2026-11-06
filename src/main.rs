@@ -1,6 +1,7 @@
 //! Pennix для Linux — скрытие окон и иконок системного трея по горячей клавише (X11).
 
 mod app;
+mod audio;
 mod config;
 mod engine;
 mod theme;

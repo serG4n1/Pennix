@@ -41,7 +41,8 @@ impl X {
     }
 
     /// Окна выбранных классов (+ окна процесса `self_pid`, если задан).
-    pub fn windows_matching(&self, classes: &[String], self_pid: Option<u32>, own_pid: u32) -> Vec<Window> {
+    /// Возвращает пары (Window ID, Option<PID>).
+    pub fn windows_matching(&self, classes: &[String], self_pid: Option<u32>, own_pid: u32) -> Vec<(Window, Option<u32>)> {
         self.list_windows()
             .into_iter()
             .filter(|w| {
@@ -52,17 +53,18 @@ impl X {
                     classes.iter().any(|c| c == &w.class)
                 }
             })
-            .map(|w| w.id)
+            .map(|w| (w.id, w.pid))
             .collect()
     }
 
     /// Окна конкретных выбранных окон/вкладок (+ окна `self_pid`, если задан).
+    /// Возвращает пары (Window ID, Option<PID>).
     pub fn windows_matching_targets(
         &self,
         targets: &[WindowTarget],
         self_pid: Option<u32>,
         own_pid: u32,
-    ) -> Vec<Window> {
+    ) -> Vec<(Window, Option<u32>)> {
         self.list_windows()
             .into_iter()
             .filter(|w| {
@@ -86,7 +88,7 @@ impl X {
                     })
                 }
             })
-            .map(|w| w.id)
+            .map(|w| (w.id, w.pid))
             .collect()
     }
 

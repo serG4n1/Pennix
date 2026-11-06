@@ -16,6 +16,7 @@ pub struct Selection {
     pub windows: Vec<WindowTarget>,
     pub hide_self: bool,
     pub hide_tray: bool,
+    pub mute_audio: bool,
 }
 
 #[derive(Clone, Default)]
@@ -58,11 +59,15 @@ impl Engine {
             let own_pid = std::process::id();
             let mut hidden_windows: Vec<HiddenWin> = Vec::new();
             let mut hidden_tray: Vec<String> = Vec::new();
+            let mut muted_audio: Vec<u32> = Vec::new();
             let mut focus = None;
             let mut key_down = false;
             let mut last_scan = Instant::now();
 
-            let hide_new = |x: &X, hidden_w: &mut Vec<HiddenWin>, hidden_t: &mut Vec<String>| {
+            let hide_new = |x: &X,
+                            hidden_w: &mut Vec<HiddenWin>,
+                            hidden_t: &mut Vec<String>,
+                            muted_a: &mut Vec<u32>| {
                 let sel = selection.lock().unwrap().clone();
                 let self_pid = sel.hide_self.then_some(own_pid);
 
@@ -72,7 +77,13 @@ impl Engine {
                     SelectionMode::Windows => x.windows_matching_targets(&sel.windows, self_pid, own_pid),
                 };
 
-                for w in matching {
+                let mut target_pids = Vec::new();
+                for (w, pid) in matching {
+                    if let Some(p) = pid {
+                        if p != own_pid && !target_pids.contains(&p) {
+                            target_pids.push(p);
+                        }
+                    }
                     if !hidden_w.iter().any(|h| h.id == w) {
                         if let Some(h) = x.hide_window(w) {
                             hidden_w.push(h);
@@ -82,7 +93,17 @@ impl Engine {
                 let _ = x.conn.flush();
                 save_hidden(hidden_w);
 
-                // 2. Скрываем иконки трея (StatusNotifierItem / XApp)
+                // 2. Глушим звук скрытых процессов
+                if sel.mute_audio && !target_pids.is_empty() {
+                    let new_muted = crate::audio::mute_pids(&target_pids);
+                    for id in new_muted {
+                        if !muted_a.contains(&id) {
+                            muted_a.push(id);
+                        }
+                    }
+                }
+
+                // 3. Скрываем иконки трея (StatusNotifierItem / XApp)
                 if sel.hide_tray {
                     let tray_classes = match sel.mode {
                         SelectionMode::Apps => sel.classes.clone(),
@@ -108,15 +129,21 @@ impl Engine {
             let toggle = |x: &X,
                           hidden_w: &mut Vec<HiddenWin>,
                           hidden_t: &mut Vec<String>,
+                          muted_a: &mut Vec<u32>,
                           focus: &mut Option<u32>| {
-                let is_hidden = !hidden_w.is_empty() || !hidden_t.is_empty();
+                let is_hidden = !hidden_w.is_empty() || !hidden_t.is_empty() || !muted_a.is_empty();
                 if !is_hidden {
                     *focus = x.active_window();
-                    hide_new(x, hidden_w, hidden_t);
+                    hide_new(x, hidden_w, hidden_t, muted_a);
                 } else {
                     x.show_windows(hidden_w, *focus);
                     hidden_w.clear();
                     save_hidden(hidden_w);
+
+                    if !muted_a.is_empty() {
+                        crate::audio::unmute_streams(muted_a);
+                        muted_a.clear();
+                    }
 
                     if !hidden_t.is_empty() {
                         crate::tray::show_tray_items(hidden_t);
@@ -134,7 +161,7 @@ impl Engine {
                         Ok(Some(Event::KeyPress(_))) => {
                             if !key_down {
                                 key_down = true;
-                                toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut focus);
+                                toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut muted_audio, &mut focus);
                             }
                         }
                         Ok(Some(Event::KeyRelease(_))) => key_down = false,
@@ -143,6 +170,10 @@ impl Engine {
                         Err(e) => {
                             x.show_windows(&hidden_windows, focus);
                             save_hidden(&[]);
+                            if !muted_audio.is_empty() {
+                                crate::audio::unmute_streams(&muted_audio);
+                                muted_audio.clear();
+                            }
                             if !hidden_tray.is_empty() {
                                 crate::tray::show_tray_items(&hidden_tray);
                                 save_hidden_tray(&[]);
@@ -158,15 +189,15 @@ impl Engine {
                     }
                 }
                 match rx.try_recv() {
-                    Ok(Cmd::Toggle) => toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut focus),
+                    Ok(Cmd::Toggle) => toggle(&x, &mut hidden_windows, &mut hidden_tray, &mut muted_audio, &mut focus),
                     Ok(Cmd::Stop) | Err(TryRecvError::Disconnected) => break,
                     Err(TryRecvError::Empty) => {}
                 }
                 // Пока окна или трей спрятаны — подхватываем вновь открывающиеся окна
-                let is_hidden = !hidden_windows.is_empty() || !hidden_tray.is_empty();
+                let is_hidden = !hidden_windows.is_empty() || !hidden_tray.is_empty() || !muted_audio.is_empty();
                 if is_hidden && last_scan.elapsed() > Duration::from_millis(500) {
                     last_scan = Instant::now();
-                    hide_new(&x, &mut hidden_windows, &mut hidden_tray);
+                    hide_new(&x, &mut hidden_windows, &mut hidden_tray, &mut muted_audio);
                     status.lock().unwrap().hidden_count = hidden_windows.len() + hidden_tray.len();
                 }
                 std::thread::sleep(Duration::from_millis(15));
@@ -174,6 +205,10 @@ impl Engine {
 
             x.show_windows(&hidden_windows, focus);
             save_hidden(&[]);
+            if !muted_audio.is_empty() {
+                crate::audio::unmute_streams(&muted_audio);
+                muted_audio.clear();
+            }
             if !hidden_tray.is_empty() {
                 crate::tray::show_tray_items(&hidden_tray);
                 save_hidden_tray(&[]);

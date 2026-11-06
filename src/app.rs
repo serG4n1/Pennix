@@ -83,6 +83,7 @@ impl PennixApp {
             windows: cfg.windows.clone(),
             hide_self: cfg.hide_self,
             hide_tray: cfg.hide_tray,
+            mute_audio: cfg.mute_audio,
         }));
 
         let wayland = std::env::var("XDG_SESSION_TYPE").map(|s| s == "wayland").unwrap_or(false);
@@ -280,6 +281,7 @@ impl PennixApp {
             windows: self.cfg.windows.clone(),
             hide_self: self.cfg.hide_self,
             hide_tray: self.cfg.hide_tray,
+            mute_audio: self.cfg.mute_audio,
         };
         self.cfg.save();
     }
