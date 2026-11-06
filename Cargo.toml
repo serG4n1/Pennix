@@ -1,6 +1,6 @@
 [package]
 name = "pennix-linux"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 description = "Pennix для Linux (X11): скрытие окон и иконок трея приложений по горячей клавише"
 license = "MIT"
